@@ -3,7 +3,7 @@ require_once 'users/init.php';
 if (!securePage($_SERVER['PHP_SELF'])){die();}
 
 $db = DB::getInstance();
-$data = $db->query("SELECT * FROM helpform2 ORDER BY id");
+$data = $db->query("SELECT * FROM helpform2 ORDER BY id DESC");
 
 ?>
 <!doctype html>
@@ -162,12 +162,11 @@ $data = $db->query("SELECT * FROM helpform2 ORDER BY id");
 		  <section class="section--center mdl-grid mdl-grid--no-spacing mdl-shadow--2dp">
             <div class="mdl-card mdl-cell mdl-cell--12-col">
               <div class="mdl-card__supporting-text mdl-grid mdl-grid--no-spacing">
-                <h4 class="mdl-cell mdl-cell--12-col">Recent Messages</h4>
+                <h4 class="mdl-cell mdl-cell--12-row">Recent Messages</h4>
 				
 				<table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
 				  <thead>
 					<tr>
-					  <th scope="col">#</th>
 					  <th scope="col">Name</th>
 					  <th scope="col">Contact #</th>
 					  <th scope="col">Message</th>
@@ -183,13 +182,12 @@ $data = $db->query("SELECT * FROM helpform2 ORDER BY id");
 				foreach ($db->results() as $record) {
 					?>
 						<tr>
-						  <th scope="row"><?=$record->id;?></th>
 						  <td><?=$record->name;?></td>
 						  <td><?=$record->contact;?></td>
 						  <td><?=$record->message;?></td>
 						  <td><?=$record->ip;?></td>
 						  <td><?=$record->location;?></td>
-						  <td><?=$record->messagetime;?></td>
+						  <td><?=$record->messagedate;?></td>
 						</tr>
 					<?php
 				}
@@ -197,6 +195,7 @@ $data = $db->query("SELECT * FROM helpform2 ORDER BY id");
 
 				  </tbody>
 				</table>
+				
               </div>
             </div>
             <!-- <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--icon" id="btn2">

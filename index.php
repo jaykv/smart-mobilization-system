@@ -15,7 +15,7 @@ if(!empty($_POST)){
 	$response = preProcessForm();
 	if($response['form_valid'] == true){
 		$message = $response['fields']['message'];
-		
+		//echo 'python3 /var/www/html/drpy/app/run.py --query "' + $message + '"';
 		// exec python classify
 		$results = exec('python3 /var/www/html/drpy/app/run.py --query "' + $message + '"');
 		
@@ -31,14 +31,10 @@ if(!empty($_POST)){
 		// send to db
 		postProcessForm($response);
 		
-		Redirect::to('index.php?err=' + $results + '!');
+		Redirect::to('index.php?err=success!');
 	}
 }
 	
-	
-
-$db = DB::getInstance();
-
 ?>
 <!doctype html>
 <html lang="en">
@@ -47,7 +43,7 @@ $db = DB::getInstance();
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Disaster Response Rescue </title>
+        <title>Smart mobilization system</title>
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
@@ -56,11 +52,11 @@ $db = DB::getInstance();
     </head>
 
     <body>
-
+		
         <nav class="navbar navbar-inverse navbar-fixed-top">
             <div class="container">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="/" target="_blank" style="color:white;">Disaster Response Project</a>
+                    <a class="navbar-brand" href="/" target="_blank" style="color:white;">Smart mobilization system</a>
                 </div>
                 <div class="collapse navbar-collapse ml-auto" id="navbar" >
                     <ul class="nav navbar-nav">
@@ -74,7 +70,7 @@ $db = DB::getInstance();
 
         <div class="jumbotron">
             <div class="container">
-                <h1 class="text-center">Disaster Response Rescue</h1>
+                <h1 class="text-center">Smart mobilization system</h1>
                 <p class="text-center">Emergency assistance through streamlined responses</p>
                 <hr />
 				<div class="row">
@@ -84,7 +80,15 @@ $db = DB::getInstance();
 				<div>
                 <div class="row">
                     <div class="col-lg-12 form-group-lg">
-						<?php displayForm('helpform2', $options);	?>
+					<?php
+						if ($_GET['err'] == 'success!') {
+							?>
+							<p class="text-center text-success">Success! Emergency services have been notified</p>
+							<?php
+						} else {
+							displayForm('helpform2', $options);
+						}
+					?>
                     </div>
                 </div>
             </div>
