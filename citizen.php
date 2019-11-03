@@ -1,4 +1,33 @@
-<?php require_once 'users/init.php'; ?>
+<?php 
+require_once 'users/init.php'; 
+if (!securePage($_SERVER['PHP_SELF'])){die();}
+
+$options = array(
+'submit'=>'Send', //If you want a custom submit button you must do 'submit'=>something. This doubles as the field name
+'class'=>'btn btn-success',
+'value'=>'Send',
+);
+
+if(!empty($_POST)){
+	$response = preProcessForm();
+	if($response['form_valid'] == true){
+		$message = $response['fields']['message'];
+		
+		// exec python classify
+		//exec('python disasterclassify.py --message "' + $message + '"');
+		
+		// send to db
+		postProcessForm($response);
+		
+		Redirect::to('index.php?err=Success!');
+	}
+}
+	
+	
+
+$db = DB::getInstance();
+
+?>
 <!doctype html>
 <html lang="en">
     <head>    
@@ -6,7 +35,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Disaster Response Project by Sanjeev</title>
+        <title>Disaster Response Project </title>
         <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
@@ -40,6 +69,7 @@
             
                 <div class="row">
                     <div class="col-lg-12 form-group-lg">
+						<?php displayForm('helpform2', $options);	?>
                         <form action="/go" method="get">    
                             <input type="text" class="form-control form-control-lg" name="query" placeholder="Enter a message to classify">
                             <div class="col-lg-offset-5">
