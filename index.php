@@ -1,38 +1,99 @@
-<?php
-if(file_exists("install/index.php")){
-	//perform redirect if installer files exist
-	//this if{} block may be deleted once installed
-	header("Location: install/index.php");
-}
+<?php 
+require_once 'users/init.php'; 
+if (!securePage($_SERVER['PHP_SELF'])){die();}
 
-require_once 'users/init.php';
-require_once $abs_us_root.$us_url_root.'users/includes/template/prep.php';
-if(isset($user) && $user->isLoggedIn()){
+$options = array(
+'submit'=>'submit', 
+'class'=>'btn btn-lg btn-success',
+'value'=>'Send',
+);
+
+$ip = $_SERVER['REMOTE_ADDR'];
+$details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+
+if(!empty($_POST)){
+	$response = preProcessForm();
+	if($response['form_valid'] == true){
+		$message = $response['fields']['message'];
+		
+		// exec python classify
+		$results = exec('python3 /var/www/html/drpy/app/run.py --query "' + $message + '"');
+		
+		$t=time();
+		$date = date("Y-m-d h:i:s",$t);
+
+		// update ip and location
+		$response['fields']['ip'] = $_SERVER['REMOTE_ADDR'];
+		$response['fields']['location'] = $details->loc;
+		$response['fields']['messagedate'] = $date;
+		$response['fields']['results'] = $results;
+		
+		// send to db
+		postProcessForm($response);
+		
+		Redirect::to('index.php?err=' + $results + '!');
+	}
 }
+	
+	
+
+$db = DB::getInstance();
+
 ?>
-<div id="page-wrapper">
-	<div class="container">
-		<div class="jumbotron">
-			<h1 align="center"><?=lang("JOIN_SUC");?> <?php echo $settings->site_name;?></h1>
-			<p align="center" class="text-muted"><?=lang("MAINT_OPEN")?></p>
-			<p align="center">
-				<?php
-				if($user->isLoggedIn()){?>
-					<a class="btn btn-primary" href="users/account.php" role="button"><?=lang("ACCT_HOME");?> &raquo;</a>
-				<?php }else{?>
-					<a class="btn btn-warning" href="users/login.php" role="button"><?=lang("SIGNIN_TEXT");?> &raquo;</a>
-					<a class="btn btn-info" href="users/join.php" role="button"><?=lang("SIGNUP_TEXT");?> &raquo;</a>
-				<?php }?>
-			</p>
-			<br>
-			<p align="center"><?=lang("MAINT_PLEASE");?></p>
-			<h4 align="center"><a href="https://userspice.com/getting-started/">https://userspice.com/getting-started/</a></h4>
-		</div>
-<?php  languageSwitcher();?> 
-	</div>
-</div>
+<!doctype html>
+<html lang="en">
+    <head>    
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- Place any per-page javascript here -->
+        <title>Disaster Response Rescue </title>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    </head>
+
+    <body>
+
+        <nav class="navbar navbar-inverse navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="/" target="_blank" style="color:white;">Disaster Response Project</a>
+                </div>
+                <div class="collapse navbar-collapse ml-auto" id="navbar" >
+                    <ul class="nav navbar-nav">
+                        <li><a href="/users/login.php" target="_blank" style="color:white;">Login</a></li>
+                        <li><a href="#" target="_top" style="color:white;">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
 
-<?php require_once $abs_us_root . $us_url_root . 'users/includes/html_footer.php'; ?>
+        <div class="jumbotron">
+            <div class="container">
+                <h1 class="text-center">Disaster Response Rescue</h1>
+                <p class="text-center">Emergency assistance through streamlined responses</p>
+                <hr />
+				<div class="row">
+					<div class="col-lg-12">
+						<p class="text-center">Your location: <?=$details->city;?>, <?=$details->region?> (<?=$details->loc?>)</p>
+					</div>
+				<div>
+                <div class="row">
+                    <div class="col-lg-12 form-group-lg">
+						<?php displayForm('helpform2', $options);	?>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+
+        </div>
+
+
+    </body>
+</html>

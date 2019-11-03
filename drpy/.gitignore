@@ -1,0 +1,16 @@
+# vscode settings
+.vscode/*
+app/.vscode/*
+# ipynb checkpoints
+.ipynb_checkpoints/*
+
+# helper notebooks
+*.ipynb
+
+# Python cache
+app/__pycache__/*.pyc
+models/__pycache__/*.pyc
+
+# Exports of README
+README.html
+README.pdf
